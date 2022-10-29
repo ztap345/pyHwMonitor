@@ -1,0 +1,28 @@
+{
+  "port": "COM4",
+  "arduino_config": {
+    "baud_rate": 115200,
+    "wait_text": "Waiting",
+    "start_suffix": "~",
+    "ready_char": "!",
+    "key_val_separator_char": ":",
+    "stop_char": "*",
+    "ready_timeout_secs": 30,
+    "wait_time_secs": 1,
+    "lcd_wait_text": "WAITING",
+    "lcd_ready_text": "READY",
+    "lcd_print_delay": 5000,
+    "lcd_scroll_delay": 150,
+    "seconds_to_millis": 1000
+  },
+  "data_config": [
+    {
+      "label": "CPU Temp",
+      "path": "hardware./amdcpu/0.sensors./amdcpu/0/temperature/0.Temperature.value"
+    },
+    {
+      "label": "GPU Temp",
+      "path": "hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"
+    }
+  ]
+}

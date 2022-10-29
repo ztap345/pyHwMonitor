@@ -1,0 +1,430 @@
+{
+    "computer_name": "DESKTOP-RLKP2G7",
+    "hardware": {
+        "/mainboard": {
+            "name": "MSI B550M PRO-VDH WIFI [CEC] (MS-7C95)",
+            "type": "Mainboard",
+            "sensors": {}
+        },
+        "/amdcpu/0": {
+            "name": "AMD Ryzen 5 5600X",
+            "type": "CPU",
+            "sensors": {
+                "/amdcpu/0/load/1": {
+                    "name": "CPU Core #1",
+                    "Load": {
+                        "min": 0.5882382392883301,
+                        "max": 3.3333301544189453,
+                        "value": 3.3333301544189453
+                    }
+                },
+                "/amdcpu/0/load/2": {
+                    "name": "CPU Core #2",
+                    "Load": {
+                        "min": 0.0,
+                        "max": 1.1764705181121826,
+                        "value": 0.0
+                    }
+                },
+                "/amdcpu/0/load/3": {
+                    "name": "CPU Core #3",
+                    "Load": {
+                        "min": 0.0,
+                        "max": 3.3333301544189453,
+                        "value": 3.3333301544189453
+                    }
+                },
+                "/amdcpu/0/load/4": {
+                    "name": "CPU Core #4",
+                    "Load": {
+                        "min": 0.0,
+                        "max": 3.3333301544189453,
+                        "value": 3.3333301544189453
+                    }
+                },
+                "/amdcpu/0/load/5": {
+                    "name": "CPU Core #5",
+                    "Load": {
+                        "min": 0.0,
+                        "max": 4.7058820724487305,
+                        "value": 0.0
+                    }
+                },
+                "/amdcpu/0/load/6": {
+                    "name": "CPU Core #6",
+                    "Load": {
+                        "min": 0.0,
+                        "max": 0.0,
+                        "value": 0.0
+                    }
+                },
+                "/amdcpu/0/load/0": {
+                    "name": "CPU Total",
+                    "Load": {
+                        "min": 1.0784327983856201,
+                        "max": 1.6666650772094727,
+                        "value": 1.6666650772094727
+                    }
+                },
+                "/amdcpu/0/power/0": {
+                    "name": "CPU Package",
+                    "Power": {
+                        "min": 32.6682243347168,
+                        "max": 34.86001205444336,
+                        "value": 34.86001205444336
+                    }
+                },
+                "/amdcpu/0/clock/0": {
+                    "name": "Bus Speed",
+                    "Clock": {
+                        "min": 100.0056381225586,
+                        "max": 100.0056381225586,
+                        "value": 100.0056381225586
+                    }
+                },
+                "/amdcpu/0/power/2": {
+                    "name": "CPU Core #1",
+                    "Power": {
+                        "min": 1.737310767173767,
+                        "max": 2.223923683166504,
+                        "value": 2.223923683166504
+                    }
+                },
+                "/amdcpu/0/power/3": {
+                    "name": "CPU Core #2",
+                    "Power": {
+                        "min": 2.3344197273254395,
+                        "max": 2.5758907794952393,
+                        "value": 2.5758907794952393
+                    }
+                },
+                "/amdcpu/0/power/4": {
+                    "name": "CPU Core #3",
+                    "Power": {
+                        "min": 1.5827046632766724,
+                        "max": 2.3793673515319824,
+                        "value": 2.3793673515319824
+                    }
+                },
+                "/amdcpu/0/power/5": {
+                    "name": "CPU Core #4",
+                    "Power": {
+                        "min": 1.1616307497024536,
+                        "max": 1.6109416484832764,
+                        "value": 1.6109416484832764
+                    }
+                },
+                "/amdcpu/0/power/6": {
+                    "name": "CPU Core #5",
+                    "Power": {
+                        "min": 2.4610350131988525,
+                        "max": 2.9050941467285156,
+                        "value": 2.9050941467285156
+                    }
+                },
+                "/amdcpu/0/power/7": {
+                    "name": "CPU Core #6",
+                    "Power": {
+                        "min": 1.029975414276123,
+                        "max": 1.0388163328170776,
+                        "value": 1.029975414276123
+                    }
+                },
+                "/amdcpu/0/temperature/0": {
+                    "name": "CPU Package",
+                    "Temperature": {
+                        "min": 45.875,
+                        "max": 45.875,
+                        "value": 45.875
+                    }
+                },
+                "/amdcpu/0/temperature/4": {
+                    "name": "CPU CCD #1",
+                    "Temperature": {
+                        "min": 36.5,
+                        "max": 49.25,
+                        "value": 36.5
+                    }
+                },
+                "/amdcpu/0/clock/1": {
+                    "name": "CPU Core #1",
+                    "Clock": {
+                        "min": 3160.17822265625,
+                        "max": 4525.2548828125,
+                        "value": 3160.17822265625
+                    }
+                },
+                "/amdcpu/0/clock/2": {
+                    "name": "CPU Core #2",
+                    "Clock": {
+                        "min": 3160.17822265625,
+                        "max": 3620.2041015625,
+                        "value": 3160.17822265625
+                    }
+                },
+                "/amdcpu/0/clock/3": {
+                    "name": "CPU Core #3",
+                    "Clock": {
+                        "min": 3160.17822265625,
+                        "max": 3620.2041015625,
+                        "value": 3160.17822265625
+                    }
+                },
+                "/amdcpu/0/clock/4": {
+                    "name": "CPU Core #4",
+                    "Clock": {
+                        "min": 3160.17822265625,
+                        "max": 3620.2041015625,
+                        "value": 3160.17822265625
+                    }
+                },
+                "/amdcpu/0/clock/5": {
+                    "name": "CPU Core #5",
+                    "Clock": {
+                        "min": 3620.2041015625,
+                        "max": 3950.22265625,
+                        "value": 3950.22265625
+                    }
+                },
+                "/amdcpu/0/clock/6": {
+                    "name": "CPU Core #6",
+                    "Clock": {
+                        "min": 3160.17822265625,
+                        "max": 3620.2041015625,
+                        "value": 3160.17822265625
+                    }
+                },
+                "/amdcpu/0/power/1": {
+                    "name": "CPU Cores",
+                    "Power": {
+                        "min": 10.315917015075684,
+                        "max": 12.72519302368164,
+                        "value": 12.72519302368164
+                    }
+                }
+            }
+        },
+        "/ram": {
+            "name": "Generic Memory",
+            "type": "RAM",
+            "sensors": {
+                "/ram/load/0": {
+                    "name": "Memory",
+                    "Load": {
+                        "min": 29.196670532226562,
+                        "max": 29.200408935546875,
+                        "value": 29.196670532226562
+                    }
+                },
+                "/ram/data/0": {
+                    "name": "Used Memory",
+                    "Data": {
+                        "min": 9.321861267089844,
+                        "max": 9.323055267333984,
+                        "value": 9.321861267089844
+                    }
+                },
+                "/ram/data/1": {
+                    "name": "Available Memory",
+                    "Data": {
+                        "min": 22.60477066040039,
+                        "max": 22.60596466064453,
+                        "value": 22.60596466064453
+                    }
+                }
+            }
+        },
+        "/nvidiagpu/0": {
+            "name": "NVIDIA NVIDIA GeForce RTX 3080",
+            "type": "GpuNvidia",
+            "sensors": {
+                "/nvidiagpu/0/temperature/0": {
+                    "name": "GPU Core",
+                    "Temperature": {
+                        "min": 45.0,
+                        "max": 46.0,
+                        "value": 45.0
+                    }
+                },
+                "/nvidiagpu/0/clock/0": {
+                    "name": "GPU Core",
+                    "Clock": {
+                        "min": 210.00001525878906,
+                        "max": 210.00001525878906,
+                        "value": 210.00001525878906
+                    }
+                },
+                "/nvidiagpu/0/clock/1": {
+                    "name": "GPU Memory",
+                    "Clock": {
+                        "min": 405.0000305175781,
+                        "max": 405.0000305175781,
+                        "value": 405.0000305175781
+                    }
+                },
+                "/nvidiagpu/0/clock/2": {
+                    "name": "GPU Shader",
+                    "Clock": {
+                        "min": 0.0,
+                        "max": 0.0,
+                        "value": 0.0
+                    }
+                },
+                "/nvidiagpu/0/load/0": {
+                    "name": "GPU Core",
+                    "Load": {
+                        "min": 16.0,
+                        "max": 17.0,
+                        "value": 16.0
+                    }
+                },
+                "/nvidiagpu/0/load/1": {
+                    "name": "GPU Frame Buffer",
+                    "Load": {
+                        "min": 16.0,
+                        "max": 17.0,
+                        "value": 16.0
+                    }
+                },
+                "/nvidiagpu/0/load/2": {
+                    "name": "GPU Video Engine",
+                    "Load": {
+                        "min": 20.0,
+                        "max": 20.0,
+                        "value": 20.0
+                    }
+                },
+                "/nvidiagpu/0/load/3": {
+                    "name": "GPU Bus Interface",
+                    "Load": {
+                        "min": 0.0,
+                        "max": 1.0,
+                        "value": 0.0
+                    }
+                },
+                "/nvidiagpu/0/control/0": {
+                    "name": "GPU Fan",
+                    "Control": {
+                        "min": 0.0,
+                        "max": 0.0,
+                        "value": 0.0
+                    }
+                },
+                "/nvidiagpu/0/fan/0": {
+                    "name": "GPU",
+                    "Fan": {
+                        "min": 0.0,
+                        "max": 0.0,
+                        "value": 0.0
+                    }
+                },
+                "/nvidiagpu/0/smalldata/3": {
+                    "name": "GPU Memory Total",
+                    "SmallData": {
+                        "min": 10240.0,
+                        "max": 10240.0,
+                        "value": 10240.0
+                    }
+                },
+                "/nvidiagpu/0/smalldata/2": {
+                    "name": "GPU Memory Used",
+                    "SmallData": {
+                        "min": 1305.09375,
+                        "max": 1305.09375,
+                        "value": 1305.09375
+                    }
+                },
+                "/nvidiagpu/0/smalldata/1": {
+                    "name": "GPU Memory Free",
+                    "SmallData": {
+                        "min": 8934.90625,
+                        "max": 8934.90625,
+                        "value": 8934.90625
+                    }
+                },
+                "/nvidiagpu/0/load/4": {
+                    "name": "GPU Memory",
+                    "Load": {
+                        "min": 12.74505615234375,
+                        "max": 12.74505615234375,
+                        "value": 12.74505615234375
+                    }
+                },
+                "/nvidiagpu/0/power/0": {
+                    "name": "GPU Power",
+                    "Power": {
+                        "min": 24.53900146484375,
+                        "max": 24.62200164794922,
+                        "value": 24.595001220703125
+                    }
+                },
+                "/nvidiagpu/0/throughput/0": {
+                    "name": "GPU PCIE Rx",
+                    "Throughput": {
+                        "min": 0.0,
+                        "max": 46.875,
+                        "value": 10.7421875
+                    }
+                },
+                "/nvidiagpu/0/throughput/1": {
+                    "name": "GPU PCIE Tx",
+                    "Throughput": {
+                        "min": 2.9296875,
+                        "max": 6.8359375,
+                        "value": 6.8359375
+                    }
+                }
+            }
+        },
+        "/hdd/0": {
+            "name": "TOSHIBA HDWD130",
+            "type": "HDD",
+            "sensors": {
+                "/hdd/0/temperature/0": {
+                    "name": "Temperature",
+                    "Temperature": {
+                        "min": 40.0,
+                        "max": 40.0,
+                        "value": 40.0
+                    }
+                },
+                "/hdd/0/load/0": {
+                    "name": "Used Space",
+                    "Load": {
+                        "min": 60.51771926879883,
+                        "max": 60.51771926879883,
+                        "value": 60.51771926879883
+                    }
+                }
+            }
+        },
+        "/hdd/1": {
+            "name": "Generic Hard Disk",
+            "type": "HDD",
+            "sensors": {
+                "/hdd/1/load/0": {
+                    "name": "Used Space",
+                    "Load": {
+                        "min": 16.446319580078125,
+                        "max": 16.446319580078125,
+                        "value": 16.446319580078125
+                    }
+                }
+            }
+        },
+        "/hdd/2": {
+            "name": "Generic Hard Disk",
+            "type": "HDD",
+            "sensors": {
+                "/hdd/2/load/0": {
+                    "name": "Used Space",
+                    "Load": {
+                        "min": 52.905494689941406,
+                        "max": 52.905494689941406,
+                        "value": 52.905494689941406
+                    }
+                }
+            }
+        }
+    }
+}
