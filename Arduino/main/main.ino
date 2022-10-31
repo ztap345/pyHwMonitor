@@ -1,110 +1,203 @@
-#include "src/ConfigConstants.h"
-#include "src/SeparatorReader.h"
-
 #include <LiquidCrystal.h>
+
+#include "src/ConfigConstants.h"
+#include "src/MessageReceiver.h"
+#include "src/SeparatorHandler.h"
+
 LiquidCrystal lcd(2, 3, 7, 6, 5, 4);
-
-enum ProgState{
-  WAITING,
-  READY,
-  PRINTING,
-  CLEARING,
-  STOPPED
-};
-
-String waitBuff = "";  // used to buffer the wait command
 int scroll_len = 0;  // used to store the scroll length for the display
-ProgState state = STOPPED;  // default state
 
-SeparatorReader reader(&Serial);
+int buttonPin = 12;
+int currBtnState;
+int lastBtnState = HIGH;
+unsigned long lastDebounce = 0;
+unsigned long debouceDelay = DEBOUNCE_DELAY;
+int lastLED = LOW;
 
+enum ListenState{
+  HANDSHAKING,  // need to handshake
+  WAITING,  // waiting on a command
+  PROCESSING  // processing command
+};
+ListenState state = HANDSHAKING;  // default state
+
+String handshakeBuff = "";
+
+int last_poll = 0;
+const int polling_interval = 10*1000;  // 1 second in millis
+
+// display labels loaded after handshaking
+int label_count = 0;
+int topLabelIndex = 0;
+String labels[MAX_LABEL_COUNT];
+
+// current command also the buffer
+String cmd = "";
+
+MessageReceiver msgRecvr(START_STRING, END_STRING);
+SeparatorHandler sepHandler;
 
 void setup() {
   Serial.begin(BAUD_RATE);
   Serial.setTimeout(1000);
-  Serial.println("Start");
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
   lcd.begin(16, 2);
-
-  stopAndWait();  // start out cleared and waiting like we just stopped
+  Serial.println("Waiting...");
 }
 
 // switch between states
 void loop() {
+  // readBtn();
+  int buttonValue = digitalRead(buttonPin);
+   if (buttonValue == LOW){
+      // If button pushed, turn LED on
+      digitalWrite(LED_BUILTIN,HIGH);
+   } else {
+      // Otherwise, turn the LED off
+      digitalWrite(LED_BUILTIN, LOW);
+   }
   switch (state) {
+    case HANDSHAKING:
+      handshake();
+      break;
+    case PROCESSING:
+      processCmd();
+      break;
     case WAITING:
-      checkProgReady();
-      break;
-    case READY:
-      reader.Read();
-      if(reader.readReady()){
-        state = PRINTING;
-      }else if(reader.isStopped()){
-        state = STOPPED;
+      if(Serial.available() > 0){
+        char c = Serial.read();
+
+        if(c != NEWLINE){
+          cmd += c;
+        }else{
+          state = PROCESSING;
+        }
       }
-      break;
-    case PRINTING:
-      printIdValBuff();
-      break;
-    case STOPPED:
-      stopAndWait();
-      break;
-    case CLEARING:
-      animateClear(scroll_len);
-      break;
+
+    readBtn();  // not working correctly
+
+    poll();
+    break;
   }
 }
 
-void checkProgReady(){
-  // send waiting and then listen for on a response for WAIT_TIME millis
-  unsigned long currentmillis = millis();
-  Serial.println(WAIT_TEXT);
-  delay(1); // delay more 1ms makes this work for some reason
-  while(millis() - currentmillis < WAIT_TIME){
+void handshake(){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Connecting...");
+  // if we're handshaking do nothing else
+  while (state == HANDSHAKING)
+  {
     if(Serial.available() > 0){
-      // load each char until into the buffer until we see a newline
       char c = Serial.read();
-      waitBuff += c;
-      if(c == NEWLINE){
-        break;
+
+      if(c != NEWLINE){
+        // didn't see a newline, add to the buffer
+        handshakeBuff += c;
+      }else{
+        if (handshakeBuff == WAKE_STRING){
+          // saw a newline and found the wake command
+          state = WAITING;
+        }
+        // state was set or a line was read and the wake string was not found
+        handshakeBuff = "";
       }
     }
   }
+  Serial.println(ACK_STRING);
+}
 
-  // wait for "START_SUFFIX\n", this means the pc responded to the wait
-  if(waitBuff.length() == 2 && waitBuff[0] == START_SUFFIX){
-    // start command seen, we can clear the buffer now since this is the only place it's used
-    waitBuff = "";
-    digitalWrite(LED_BUILTIN, LOW);
-    setReady();
+
+void processCmd(){
+  if(cmd == "blink"){
+    Serial.println("Blinking");
+    test_output();
+    test_output();
+    test_output();
+  }else if(cmd == "ld_lbls"){
+    handleLoadLabels();
+  }else if(cmd == "close"){
+    state = HANDSHAKING;
   }
+  cmd = "";
+  Serial.println(ACK_STRING);
+  state = WAITING;
 }
 
-void setReady(){
-    reader.Reset();
-    lcd.clear();
-    lcd.print(LCD_READY_TEXT);
-    state = READY;
-    Serial.println(READY_CHAR);
+void handleLoadLabels(){
+  Serial.println("Loading Labels");
+  sepHandler.init(LIST_SEPARATOR, NEWLINE, MAX_LABEL_COUNT);
+  while(!msgRecvr.isFinished()){
+    if(Serial.available() > 0){
+      msgRecvr.readChar(Serial.read(), &sepHandler);
+    }
+  }
+
+  loadLabels(sepHandler.get());
+  msgRecvr.clear();
 }
 
-// function to print the buffer to the lcd
-void printIdValBuff(){
-  String key = reader.GetKey();
-  String value = reader.GetValue();
+void loadLabels(String* newLabels){
+  label_count = 0;
+  for(int i=0; i<MAX_LABEL_COUNT; i++){
+    labels[i] = newLabels[i] + ":";
+    if(labels[i] != ":"){
+      label_count++;
+    }
+  }
+  refreshLabels();
+}
+
+void refreshLabels(){
+  int bottomLabelIndex = topLabelIndex + 1;
+  if(topLabelIndex == label_count){
+    bottomLabelIndex = 0;
+  }
+
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print(key);
+  lcd.print(labels[topLabelIndex]);
   lcd.setCursor(0,1);
-  lcd.print(value);
+  lcd.print(labels[bottomLabelIndex]);
+}
 
-  if(key.length() > value.length()){
-    scroll_len = key.length();
-  }else{
-    scroll_len = value.length();
+void readBtn(){
+  int newBtnState = digitalRead(buttonPin);
+
+  if(newBtnState == LOW){
+    Serial.println("LO");
   }
-  reader.Reset();
-  state = CLEARING;
+
+  if(newBtnState != lastBtnState){
+    lastDebounce = millis();
+  }
+
+  if((millis() - lastDebounce) > debouceDelay){
+    if (newBtnState != currBtnState){
+      currBtnState = newBtnState;
+
+      if(currBtnState == LOW){
+        // lastLED = !lastLED;
+        // digitalWrite(LED_BUILTIN, lastLED);
+        Serial.println("PRESSED");
+        topLabelIndex++;
+        if(topLabelIndex > label_count){
+          topLabelIndex = 0;
+        }
+        refreshLabels();
+      }
+    }
+  }
+}
+
+void poll(){
+  int diff = millis() - last_poll;
+  if(diff > polling_interval){  // or poll command
+    Serial.print("polling: ");
+    Serial.println(diff);
+    last_poll = millis();  // fix me
+  }
 }
 
 // animated clear (for fun!)
@@ -114,15 +207,11 @@ void animateClear(int scroll_len){
     lcd.scrollDisplayLeft();
     delay(LCD_SCROLL_DELAY);
   }
-  setReady();
 }
 
-// cleans up and starts waiting again
-void stopAndWait(){
-  reader.Reset();
-  state = WAITING;
-  digitalWrite(LED_BUILTIN, HIGH); // LED's for flash/debugging
-  lcd.clear();
-  lcd.print(LCD_WAIT_TEXT);
+void test_output(){
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
 }
-
