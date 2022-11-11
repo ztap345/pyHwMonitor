@@ -1,6 +1,8 @@
-import serial
+import time
 
-from config import AppConfiguration
+from src.Communicator.PacketAckComm import PacketAckComm
+from src.Configuration import AppConfiguration
+from src.Connections.SerialConn import SerialConn
 
 debug = True
 
@@ -13,13 +15,16 @@ def to_bytes(string):
 
 def serial_wait(ser_con, in_recv):
     in_recv = to_bytes(in_recv)
-
-    while True:
+    retry_count = 3
+    retry = 0
+    while retry < retry_count:
         lines = ser_con.readline()
         if debug and lines:
             print(lines)
         if in_recv in lines:
-            break
+            return True
+        retry += 1
+    return False
 
 
 def serial_writeln(ser_con, write):
@@ -30,25 +35,39 @@ def serial_writeln(ser_con, write):
 
 if __name__ == '__main__':
     config = AppConfiguration()
-    arduino_cfg = config.get_arduino_cfg()
 
-    baud_rate = arduino_cfg['baud_rate']
-    com_port = config.get('port')
+    packetComm = PacketAckComm(SerialConn, config.get_comm_config())
+    print("holding for boot")
+    time.sleep(5)  # boot time
 
-    serial_con = serial.Serial(com_port, baud_rate)
-    while True:
-        print("Waiting for wake signal")
-        serial_wait(serial_con, arduino_cfg['wait_text'])
-        print("Wake signal found!")
 
-        input("Press Enter to Start...")
-        serial_writeln(serial_con, arduino_cfg['start_suffix'])
-        serial_wait(serial_con, arduino_cfg['ready_char'])
+    # connection sequence:
+    #   arduino boots and start's listening for a wake signal
+    #   monitor sends the wake signal and waits for the acknowledgment signal
+    #   Arduino sends the ack and gets ready for commands
+    #   monitor receives the ack and sends the load labels command
+    #   Monitor sends the labels with the start string, packet, end string then waits for ack
+    #   arduino processes the packet and sends the ack string
+    #   Monitor receives the ack and starts to wait for polls to request data
 
-        while (user := input("send a string to arduino: ")) != f"{arduino_cfg['stop_char']}":
-            serial_writeln(serial_con, user)
-            serial_wait(serial_con, arduino_cfg['ready_char'])
+    # send wake and wait for ack
+    packetComm.start()
 
-        if input("Would you like to listen again? (y/n)") not in ['n', 'N']:
-            break
+    # send the label command and the labels, then wait for the ack
+    data_config = config.get("display")["data_config"]
+    commands = config.get("commands")
+    load_labels = ",".join([data["label"] for data in data_config])
+    packetComm.transmit(load_labels, command=commands['ld_lbls_cmd'])
+    found = packetComm.collect(is_ack=True)
+
+    if found:
+        # poll
+        print("Done! waiting for poll...")
+        while True:
+            # found = serial_wait(serial_con, "polling")
+            polled = packetComm.collect()
+            if polled:
+                print("Polled!")
+            else:
+                print("timed out!")
 

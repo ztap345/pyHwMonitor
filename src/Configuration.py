@@ -18,8 +18,9 @@ class AppConfiguration:
         with open(cfg_json, "r+") as cfg:
             self.config_dict = json.load(cfg)
 
-    def get_arduino_cfg(self):
-        return self.config_dict['arduino_config']
+
+    def get_comm_config(self):
+        return self.config_dict['communications']
 
     def get(self, s: str):
         return self.config_dict.get(s)
@@ -48,7 +49,7 @@ def parse_line(line, arduino_cfg):
 
 
 def populate_arduino_config(config: AppConfiguration):
-    arduino_cfg = config.get_arduino_cfg()
+    arduino_cfg = config.get_comm_config()["arduino_config"]
     config_h_template = "Arduino/main/Resources/Config.template.h"
     output_config_h = "Arduino/main/src/ConfigConstants.h"
 

@@ -1,28 +1,48 @@
 {
-  "port": "COM4",
-  "arduino_config": {
-    "baud_rate": 115200,
-    "wait_text": "Waiting",
-    "start_suffix": "~",
-    "ready_char": "!",
-    "key_val_separator_char": ":",
-    "stop_char": "*",
-    "ready_timeout_secs": 30,
-    "wait_time_secs": 1,
-    "lcd_wait_text": "WAITING",
-    "lcd_ready_text": "READY",
-    "lcd_print_delay": 5000,
-    "lcd_scroll_delay": 150,
-    "seconds_to_millis": 1000
-  },
-  "data_config": [
-    {
-      "label": "CPU Temp",
-      "path": "hardware./amdcpu/0.sensors./amdcpu/0/temperature/0.Temperature.value"
+  "communications": {
+    "connection_config": {
+      "com_port": "COM4",
+      "baud_rate": 115200,
+      "timeout": 3
     },
-    {
-      "label": "GPU Temp",
-      "path": "hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"
+    "arduino_config": {
+      "baud_rate": 115200,
+      "key_val_separator_char": ":",
+      "ready_timeout_secs": 30,
+      "wait_time_secs": 1,
+      "max_label_count": 8,
+      "lcd_wait_text": "WAITING",
+      "lcd_ready_text": "READY",
+      "lcd_print_delay": 5000,
+      "lcd_scroll_delay": 150,
+      "debounce_delay": 50
+    },
+    "monitor_config": {
+      "retries": 3,
+      "wake_string": "___",
+      "start_string": "!__",
+      "end_string": "__!",
+      "ack_string": "!!!",
+      "poll_string": "polling"
     }
-  ]
+  },
+  "commands": {
+      "ld_lbls_cmd": "ld_lbls"
+  },
+  "display": {
+    "data_config": [
+      {
+        "label": "CPU Temp",
+        "path": "hardware./amdcpu/0.sensors./amdcpu/0/temperature/0.Temperature.value"
+      },
+      {
+        "label": "GPU Temp",
+        "path": "hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"
+      },
+      {
+        "label": "RAM Temp",
+        "path": "hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"
+      }
+    ]
+  }
 }

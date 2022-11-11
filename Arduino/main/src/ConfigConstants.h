@@ -1,4 +1,6 @@
-#define BAUD_RATE 115200  // int
+// hardware config
+#define BAUD_RATE 115200
+#define DEBOUNCE_DELAY 50
 
 // Parsing Settings
 #define MAX_LABEL_COUNT 8
@@ -18,5 +20,5 @@
 #define END_STRING "__!"
 #define ACK_STRING "!!!"
 
-// hardware config
-#define DEBOUNCE_DELAY 50
+// actions
+#define LD_LBLS_CMD "ld_lbls"
