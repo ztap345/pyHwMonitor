@@ -23,11 +23,13 @@
       "start_string": "!__",
       "end_string": "__!",
       "ack_string": "!!!",
-      "poll_string": "polling"
+      "poll_string": "polling",
+      "close_string": "close"
     }
   },
   "commands": {
-      "ld_lbls_cmd": "ld_lbls"
+      "ld_lbls_cmd": "ld_lbls",
+      "close_cmd": "close"
   },
   "display": {
     "data_config": [

@@ -54,24 +54,26 @@ void loop() {
       processCmd();
       break;
     case WAITING:
+      readBtn();
+
+      poll();
+
       if(Serial.available() > 0){
         char c = Serial.read();
 
         if(c != NEWLINE){
           cmd += c;
         }else{
+          Serial.println(cmd);
           state = PROCESSING;
         }
       }
-
-      readBtn();
-
-      poll();
       break;
   }
 }
 
 void handshake(){
+  Serial.println("handshaking");
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Connecting...");
@@ -108,7 +110,9 @@ void processCmd(){
   }else if(cmd == "ld_values"){
     handleLoadValues();
   }else if(cmd == "close"){
+    Serial.println("Closing conenction");
     state = HANDSHAKING;
+    return;
   }
   cmd = "";
   Serial.println(ACK_STRING);

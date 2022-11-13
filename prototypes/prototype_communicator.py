@@ -1,6 +1,6 @@
 import time
 
-from src.Communicator.PacketAckComm import PacketAckComm
+from src.Protocols.PacketAckProtocol import PacketAckProtocol
 from src.Configuration import AppConfiguration
 from src.Connections.SerialConn import SerialConn
 
@@ -36,7 +36,7 @@ def serial_writeln(ser_con, write):
 if __name__ == '__main__':
     config = AppConfiguration()
 
-    packetComm = PacketAckComm(SerialConn, config.get_comm_config())
+    packetComm = PacketAckProtocol(SerialConn, config.get_comm_config())
     print("holding for boot")
     time.sleep(5)  # boot time
 
@@ -54,10 +54,8 @@ if __name__ == '__main__':
     packetComm.start()
 
     # send the label command and the labels, then wait for the ack
-    data_config = config.get("display")["data_config"]
-    commands = config.get("commands")
-    load_labels = ",".join([data["label"] for data in data_config])
-    packetComm.transmit(load_labels, command=commands['ld_lbls_cmd'])
+    test_labels = "test 1,test 2,test 3,test 4"
+    packetComm.transmit(test_labels, pre_payload="ld_lbls")
     found = packetComm.collect(is_ack=True)
 
     if found:

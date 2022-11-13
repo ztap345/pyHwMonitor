@@ -1,15 +1,30 @@
 from typing import Type
 
-from src.Communicator.AbstractCommunicator import AbstractCommunicator
+from src.Protocols.AbstractProtocol import AbstractProtocol
 from src.Connections.AbstractConnection import AbstractConnection
 
 
 # packet/acknowledgement connection.
 # Commands sent in "packets" in the form start_string \n data\n...\n end_string\n
 # then an acknowledgement packet is sent
-class PacketAckComm(AbstractCommunicator):
+class PacketAckProtocol(AbstractProtocol):
 
     def __init__(self, connection: Type[AbstractConnection], comm_config: dict):
+        """
+        A protocol connection that sends packets denoted by a start and end string
+        and waits for an acknowledgment string
+        Configure the packet acknowledgment protocol with a connection type.
+        :param connection: Connection backend to use for communication
+        :param comm_config: Configuration for the protocol.
+            connection_config: configuration for the specific connection being used
+            monitor_config: overall configuration relating to the hw monitor
+                retries: how many retries to attempt before failing
+                wake_string: string used to start the communication
+                start_string: the beginning of a packet
+                end_string: the end of a packet
+                ack_string: string to listen for
+                poll_string: interrupt string used to poll data
+        """
         self.comm_config: dict = comm_config
 
         self.connection: AbstractConnection = connection()
@@ -22,6 +37,7 @@ class PacketAckComm(AbstractCommunicator):
         self.end_string: str = monitor_config["end_string"]
         self.ack_string: str = monitor_config["ack_string"]
         self.poll_string: str = monitor_config["poll_string"]
+        self.close_string: str = monitor_config["close_string"]
 
     # wake string
     def start(self):
@@ -35,6 +51,7 @@ class PacketAckComm(AbstractCommunicator):
 
     # stop the connection
     def stop(self):
+        self.connection.send(self.close_string)
         self.connection.close()
 
     # see if the connection is up
@@ -42,9 +59,9 @@ class PacketAckComm(AbstractCommunicator):
         return self.connection.connected()
 
     # send the start and end strings as well as the payload
-    def transmit(self, *payload: str, command: str = None) -> any:
-        if command:
-            self.connection.send(command)
+    def transmit(self, *payload: str, pre_payload: str = None) -> any:
+        if pre_payload:
+            self.connection.send(pre_payload)
         self.connection.send(self.start_string)
         for data in payload:
             self.connection.send(data)

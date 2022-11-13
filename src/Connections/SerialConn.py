@@ -11,10 +11,10 @@ class SerialConn(AbstractConnection):
         self.timeout = None
 
     # set up the serial connection
-    def setup(self, **kwargs):
-        self.com_port = kwargs["com_port"] if "com_port" in kwargs else None
-        self.baud_rate = kwargs["baud_rate"] if "baud_rate" in kwargs else None
-        self.timeout = kwargs["timeout"] if "timeout" in kwargs else None
+    def setup(self, **kwargs: dict[str, any]):
+        self.com_port = kwargs.get("com_port")
+        self.baud_rate = kwargs.get("baud_rate")
+        self.timeout = kwargs.get("timeout")
         self.serial_conn = serial.Serial(self.com_port, self.baud_rate, timeout=self.timeout)
 
     # start the serial connection
