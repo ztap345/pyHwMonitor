@@ -17,7 +17,7 @@
       "lcd_scroll_delay": 150,
       "debounce_delay": 50
     },
-    "monitor_config": {
+    "protocol_config": {
       "retries": 3,
       "wake_string": "___",
       "start_string": "!__",
@@ -28,8 +28,9 @@
     }
   },
   "commands": {
-      "ld_lbls_cmd": "ld_lbls",
-      "close_cmd": "close"
+    "ld_lbls_cmd": "ld_lbls",
+    "ld_values_cmd": "ld_values",
+    "close_cmd": "close"
   },
   "display": {
     "data_config": [
@@ -39,10 +40,6 @@
       },
       {
         "label": "GPU Temp",
-        "path": "hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"
-      },
-      {
-        "label": "RAM Temp",
         "path": "hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"
       }
     ]

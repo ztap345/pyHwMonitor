@@ -30,14 +30,14 @@ class PacketAckProtocol(AbstractProtocol):
         self.connection: AbstractConnection = connection()
         self.connection.setup(**comm_config["connection_config"])
 
-        monitor_config: dict = comm_config["monitor_config"]
-        self.retires: int = monitor_config["retries"]
-        self.wake_string: str = monitor_config["wake_string"]
-        self.start_string: str = monitor_config["start_string"]
-        self.end_string: str = monitor_config["end_string"]
-        self.ack_string: str = monitor_config["ack_string"]
-        self.poll_string: str = monitor_config["poll_string"]
-        self.close_string: str = monitor_config["close_string"]
+        protocol_config: dict = comm_config["protocol_config"]
+        self.retires: int = protocol_config["retries"]
+        self.wake_string: str = protocol_config["wake_string"]
+        self.start_string: str = protocol_config["start_string"]
+        self.end_string: str = protocol_config["end_string"]
+        self.ack_string: str = protocol_config["ack_string"]
+        self.poll_string: str = protocol_config["poll_string"]
+        self.close_string: str = protocol_config["close_string"]
 
     # wake string
     def start(self):
@@ -74,7 +74,7 @@ class PacketAckProtocol(AbstractProtocol):
         retry_count = 0
         while True:
             received_line = self.connection.recv()
-            if received_line:
+            if self.ack_string not in received_line:
                 print(received_line)
             if find_me in received_line:
                 return True

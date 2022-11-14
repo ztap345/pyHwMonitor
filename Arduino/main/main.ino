@@ -147,14 +147,23 @@ void loadLabels(String* newLabels){
 
 void handleLoadValues(){
   Serial.println("Loading Values");
-  sepHandler.init(KEY_VAL_SEPARATOR, NEWLINE, 2);
+  sepHandler.init(LIST_SEPARATOR, NEWLINE, 2);
   while(!msgRecvr.isFinished()){
     if(Serial.available() > 0){
       msgRecvr.readChar(Serial.read(), &sepHandler);
     }
   }
-  
+
+  loadValues(sepHandler.get());
   msgRecvr.clear();
+}
+
+void loadValues(String* newValues){
+  for(int i=0; i<MAX_LABEL_COUNT; i++){
+    values[i] = newValues[i];
+  }
+
+  refreshLabels();
 }
 
 void incrementLabels(){

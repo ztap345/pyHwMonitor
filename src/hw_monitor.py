@@ -6,8 +6,7 @@ import time
 
 import clr
 
-from UpdateHandler import PathUpdateHandler
-from utilities import get_nested_item
+from src.utilities import get_nested_item
 
 OHM_NAME = "OpenHardwareMonitorLib.dll"
 OHM_PATH = os.path.join(os.getcwd(), OHM_NAME)
@@ -54,7 +53,7 @@ class Monitor:
 
     def __init__(self):
         self.computer = Monitor.init_hw_monitor()
-        self.handlers = {}
+        # self.handlers = {}
         self.hw_dict = self.__load_hw_dict()
 
     def update(self):
@@ -63,11 +62,6 @@ class Monitor:
             return
 
         self.hw_dict = new_hw_dict
-        for path, handler in self.handlers.items():
-            handler.update(self.get_value_from_path(path))
-
-    def register(self, handler: PathUpdateHandler, path: str):
-        self.handlers[path] = handler
 
     def get_value_from_path(self, path: str):
         path_list = Monitor.split_path(path)

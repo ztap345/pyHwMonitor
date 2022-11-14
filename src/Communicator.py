@@ -13,6 +13,7 @@ class Communicator:
     # RUNNING = "running"
 
     def __init__(self, config: AppConfiguration, protocol: Type[AbstractProtocol], conn: Type[AbstractConnection]):
+        self.poll_listener = None
         self.is_running: bool = False
         self.config: AppConfiguration = config
         self.protocol: AbstractProtocol = protocol(conn, self.config.get_comm_config())
@@ -36,14 +37,20 @@ class Communicator:
         self.is_running = False
 
     # thread "worker"
-    def communicate(self):
+    def _communicate(self, poll_listener):
         while self.is_running:
             polled = self.protocol.collect()
             if polled:
                 print("Polled!")
-            else:
-                print("timed out, blinking")
-                self.send_command("blink")
+                if poll_listener is not None:
+                    print("Running listener")
+                    poll_listener.run()
+            # else:
+            #     print("timed out, blinking")
+            #     self.send_command("blink")
+
+    def set_poll_listener(self, listener):
+        self.poll_listener = listener
 
 
 if __name__ == '__main__':
@@ -70,7 +77,7 @@ if __name__ == '__main__':
 
     if ack_d:
         try:
-            coms.communicate()
+            coms._communicate(None)
         except KeyboardInterrupt:
             coms.stop_communication()
     else:
