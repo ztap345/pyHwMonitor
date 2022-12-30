@@ -1,11 +1,10 @@
-import copy
-import json
 import os
-import pickle
-import time
+from functools import reduce
 
 import clr
 
+from src.OHMInterfaces.PyIHardware import PyIHardware
+from src.OHMInterfaces.PyISensor import PyISensor
 from src.utilities import get_nested_item
 
 OHM_NAME = "OpenHardwareMonitorLib.dll"
@@ -18,156 +17,138 @@ else:
     raise FileNotFoundError("Open Hardware Monitor dll was not found")
 
 
-# schema:
-#   {
-#       "computer_name": "my_pc",
-#       "hardware":
-#       {
-#           "$hardware.Identifier"{
-#               "name": "",
-#               "type": "",
-#               "sensors":{
-#               "${sensor.Identifier}":{
-#                   "name":"",
-#                   "${sensor.Type}: {
-#                       "min": "",
-#                       "max": "",
-#                       "value": ""
-#                       }
-#                   }
-#               },
-#               "hardware":{
-#                   # this is the sub_hardware if it exists, pattern repeats here
-#               }
-#           },
-#           ...
-#       },
-#       ...
-#   }
+def convert_to_interface(obj: any) -> PyIHardware | PyISensor:
+    if isinstance(obj, Hardware.IHardware):
+        return PyIHardware(obj)
+    elif isinstance(obj, Hardware.ISensor):
+        return PyISensor(obj)
 
-def get_size(o):
-    return len(pickle.dumps(o))
+
+def try_convert_int(val: str) -> int | str:
+    try:
+        return int(val)
+    except ValueError:
+        return val
 
 
 class Monitor:
 
     def __init__(self):
+        self.hw_tree = None
+        self.sensor_list = None
         self.computer = Monitor.init_hw_monitor()
-        # self.handlers = {}
-        self.hw_dict = self.__load_hw_dict()
 
-    def update(self):
-        new_hw_dict = self.__load_hw_dict()
-        if new_hw_dict == self.hw_dict:
-            return
+        self.update()
 
-        self.hw_dict = new_hw_dict
+    def update(self) -> None:
+        self.__load_tree()
 
-    def get_value_from_path(self, path: str):
-        path_list = Monitor.split_path(path)
-        return get_nested_item(self.hw_dict, path_list)
-
-    def __load_hw_dict(self):
-        return Monitor.load_computer(self.computer.get_Hardware())
+    def get_sensor_from_path(self, path: str) -> PyISensor:
+        sensor_path = self.split_all_path(path)
+        sensor_path.append("__obj__")
+        return get_nested_item(self.hw_tree, sensor_path)
 
     @staticmethod
-    def split_path(path: str):
-        return path.split(".")
-
-    @staticmethod
-    def __get_copy(choice):
-        if choice == "computer":
-            return copy.deepcopy({"computer_name": os.environ['COMPUTERNAME'], "hardware": {}})  # computer_start_dict
-        if choice == "hardware":
-            return copy.deepcopy({"name": None, "type": None, "sensors": {}})  # hardware_start_dict
-        if choice == "sensor":
-            return copy.deepcopy({"name": None})  # sensor_start_dict
-        if choice == "sensor_type":
-            return copy.deepcopy({"min": None, "max": None, "value": None})  # sensor_type_start_dict
-
-    @staticmethod
-    def init_hw_monitor():
+    def init_hw_monitor(settings: () = ("cpu", "gpu", "mobo", "ram", "storage")):
+        # types = Hardware.HardwareType.__dict__
         comp = Hardware.Computer()
-        comp.MainboardEnabled = True
-        comp.CPUEnabled = True
-        comp.GPUEnabled = True
-        comp.RAMEnabled = True
-        comp.HDDEnabled = True
+        comp.MainboardEnabled = "mobo" in settings
+        comp.CPUEnabled = "cpu" in settings
+        comp.GPUEnabled = "gpu" in settings
+        comp.RAMEnabled = "ram" in settings
+        comp.HDDEnabled = "storage" in settings
         comp.Open()
         return comp
 
     @staticmethod
-    def load_sensor_type(sensor):
-        sensor_type = Monitor.__get_copy("sensor_type")
-        sensor_type["min"] = sensor.Min
-        sensor_type["max"] = sensor.Max
-        sensor_type["value"] = sensor.Value
-        return sensor_type
+    def split_path(path: str) -> ():
+        if path.startswith("/"):
+            path = path[1:]
+
+        split = path.split("/", 1)
+        return (try_convert_int(split[0]), split[1]) if len(split) > 1 else (path, None)
 
     @staticmethod
-    def load_hardware(hw):
-        hw_dict = Monitor.__get_copy("hardware")
-
-        hw_dict["name"] = hw.Name
-        hw_dict["type"] = str(hw.HardwareType)
-        for sensor in hw.Sensors:
-            s_id = str(sensor.Identifier)
-            s_type = str(sensor.SensorType)
-            if s_id not in hw_dict["sensors"]:
-                new_sensor = Monitor.__get_copy("sensor")
-                new_sensor["name"] = sensor.Name
-                new_sensor[s_type] = Monitor.load_sensor_type(sensor)
-                hw_dict["sensors"][s_id] = new_sensor
-            else:
-                hw_dict["sensors"][s_id][s_type] = Monitor.load_sensor_type(sensor)
-
-        for sub_hw in hw.SubHardware:
-            hw_dict[str(sub_hw.Identifier)] = Monitor.load_hardware(sub_hw)
-
-        return hw_dict
+    def split_all_path(path):
+        path_list = []
+        branch, rem = Monitor.split_path(path)
+        while True:
+            path_list.append(branch)
+            if rem is None:
+                break
+            branch, rem = Monitor.split_path(rem)
+        return path_list
 
     @staticmethod
-    def load_computer(hw_list):
-        comp_dict = Monitor.__get_copy("computer")
+    def add_to_tree(current_branch: dict, obj: Hardware.IHardware | Hardware.ISensor, path: str = None) -> None:
+        if path is None:
+            path = obj.Identifier.ToString()
 
-        for hw in hw_list:
+        branch, path_remainder = Monitor.split_path(path)
+        if branch not in current_branch:
+            current_branch[branch] = {}
+
+        if path_remainder is None:
+            current_branch[branch]["__obj__"] = convert_to_interface(obj)
+        else:
+            Monitor.add_to_tree(current_branch[branch], obj, path_remainder)
+
+    def __load_tree(self):
+        self.hw_tree = {}
+        self.sensor_list = []
+        for hw in self.computer.get_Hardware():
             hw.Update()
-            comp_dict['hardware'][str(hw.Identifier)] = Monitor.load_hardware(hw)
-
-        return comp_dict
+            # add the hardware
+            self.add_to_tree(self.hw_tree, hw)
+            # add the sub-hardware
+            for sub_hw in hw.get_SubHardware():
+                self.add_to_tree(self.hw_tree, sub_hw)
+            # add the sensors
+            for sensor in hw.get_Sensors():
+                self.add_to_tree(self.hw_tree, sensor)
+                self.sensor_list.append(sensor.Identifier.ToString())
 
 
 if __name__ == '__main__':
     hw_monitor = Monitor()
-    read_times = []
-    data = []
-    num_reads = 10
-    for i in range(num_reads):
-        start = time.perf_counter_ns()
-        hw_monitor.update()
-        data.append(hw_monitor.hw_dict)
-        read_times.append(time.perf_counter_ns() - start)
-        # time.sleep(1)
-
-    total_time_ns = sum(read_times)
-    avg_time_ns = total_time_ns/num_reads
-
-    print(f"Total time: {total_time_ns/1e9}s")
-    print(f"Avg time: {avg_time_ns/1e9}s")
-
-    size = get_size(data[0])
-    total_storage = num_reads * size
-    measured_total = sum(map(get_size, data))
-    measured_size = measured_total/len(data)
-
-    print(f"Singular size: {size} bytes")
-    print(f"{num_reads} object(s) take up: {total_storage} bytes")
-    print(f"measured size: {measured_size} bytes")
-    print(f"measured total: {measured_total} bytes")
-    with open("computer.json", "w+") as f:
-        json.dump(data[0], f, indent=4)
-    print(json.dumps(data[0], indent=2))
-
-    print(hw_monitor.get_value_from_path("computer_name"))
-    print(hw_monitor.get_value_from_path("hardware./amdcpu/0.sensors./amdcpu/0/temperature/0.Temperature.value"))
-    print(hw_monitor.get_value_from_path("hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"))
+    # print(hw_monitor.computer.GetReport())
+    # print(hw_monitor.get_sensor_from_path("/nvidiagpu/0/temperature/0"))
+    for sense_path in hw_monitor.sensor_list:
+        s = hw_monitor.get_sensor_from_path(sense_path)
+        # print(sensor)
+        print(s.Hardware.Name, s.Name, s.SensorType)
+        print(s.Max)
+        print(s.Identifier)
+        print()
+    # read_times = []
+    # data = []
+    # num_reads = 10
+    # for i in range(num_reads):
+    #     start = time.perf_counter_ns()
+    #     hw_monitor.update()
+    #     data.append(hw_monitor.hw_dict)
+    #     read_times.append(time.perf_counter_ns() - start)
+    #     # time.sleep(1)
+    #
+    # total_time_ns = sum(read_times)
+    # avg_time_ns = total_time_ns/num_reads
+    #
+    # print(f"Total time: {total_time_ns/1e9}s")
+    # print(f"Avg time: {avg_time_ns/1e9}s")
+    #
+    # size = get_size(data[0])
+    # total_storage = num_reads * size
+    # measured_total = sum(map(get_size, data))
+    # measured_size = measured_total/len(data)
+    #
+    # print(f"Singular size: {size} bytes")
+    # print(f"{num_reads} object(s) take up: {total_storage} bytes")
+    # print(f"measured size: {measured_size} bytes")
+    # print(f"measured total: {measured_total} bytes")
+    # with open("computer.json", "w+") as f:
+    #     json.dump(data[0], f, indent=4)
+    # print(json.dumps(data[0], indent=2))
+    #
+    # print(hw_monitor.get_value_from_path("computer_name"))
+    # print(hw_monitor.get_value_from_path("hardware./amdcpu/0.sensors./amdcpu/0/temperature/0.Temperature.value"))
+    # print(hw_monitor.get_value_from_path("hardware./nvidiagpu/0.sensors./nvidiagpu/0/temperature/0.Temperature.value"))

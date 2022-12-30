@@ -9,3 +9,6 @@ def get_nested_item(data: list | dict, keys: list[str]):
         print("Lookup error")
         return None
 
+
+def celsius_to_fahrenheit(celsius: float):
+    return celsius * 1.8 + 32
